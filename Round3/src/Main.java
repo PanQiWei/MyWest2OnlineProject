@@ -197,13 +197,16 @@ class Reg{
 
 class Log{
     private Info info=new Info();
+    private Scanner scanner=new Scanner(System.in);
     private String query="SELECT * FROM user WHERE username=?";
     private String allInfoQuery="SELECT * FROM user ORDER BY isadmin DESC";
     private Connection conn=null;
     private PreparedStatement pstmt=null;
     private ResultSet rs=null;
 
-    public Log(){}
+    public Log(){
+        scanner.useDelimiter("\n");
+    }
 
     private void getInfo(){
         System.out.print("账号:");
@@ -225,8 +228,6 @@ class Log{
                 java.util.Date birthday=rs.getDate("birthday");
                 String phone=rs.getString("phone");
                 int isAdmin=rs.getInt("isadmin");
-                Scanner scanner=new Scanner(System.in);
-                scanner.useDelimiter("\n");
                 System.out.println("登陆成功！");
                 System.out.println("---------------------------------------------------------------------------------");
                 System.out.println("您的账户信息如下：");
@@ -273,15 +274,17 @@ class Log{
                     rs.close();
                     pstmt.close();
                     loop:while (true){
-                        System.out.println("请选择要进行的操作：A.添加新管理员  B.删除用户信息 C.退出");
+                        System.out.println("请选择要进行的操作：A.添加新管理员  B.删除用户信息 C.修改管理员信息 D.退出");
                         String choice1=scanner.next();
                         switch (choice1){
                             case "A":
+                            case "a":
                                 Reg r=new Reg();
                                 r.getInfo().setIsAdmin(1);
                                 r.regist();
                                 break;
                             case "B":
+                            case "b":
                                 System.out.print("请输入要删除的用户账号：");
                                 String deleteUser=scanner.next();
                                 String querySql="SELECT username FROM user WHERE username='"+deleteUser+"'";
@@ -311,58 +314,18 @@ class Log{
                                 stmt.close();
                                 break;
                             case "C":
+                            case "c":
+                                this.updateInfo();
+                                break ;
+                            case "D":
+                            case "d":
                                 break loop;
-                            default:System.out.println("请输入正确选项（A,B或C）");
+                            default:System.out.println("请输入正确选项（A,B,C或D）");
                         }
                     }
                 }else {//非管理员用户进行的操作：更改信息
                     System.out.println("亲爱的"+name+"("+this.info.getUserName()+"),欢迎回来！");
-                    loop:while (true){
-                        System.out.println("请选择您要进行的操作： A.修改密码  B.修改生日  C.修改电话 D.退出");
-                        String choice=scanner.next();
-                        String updateSql=null;
-                        switch (choice){
-                            case "A":
-                                System.out.print("请输入新密码：");
-                                String newPassword=scanner.next();
-                                updateSql="UPDATE user SET password=? WHERE username='"+this.info.getUserName()+"'";
-                                pstmt=conn.prepareStatement(updateSql);
-                                pstmt.setString(1,newPassword);
-                                pstmt.executeUpdate();
-                                System.out.println("密码修改成功！");
-                                System.out.println("新的密码为："+newPassword);
-                                pstmt.close();
-                                break;
-                            case "B":
-                                System.out.print("请输入新的日期（yyyy-mm-dd）：");
-                                String newBirthday=scanner.next();
-                                java.util.Date temp=new java.text.SimpleDateFormat("yyyy-mm-dd").parse(newBirthday);
-                                java.sql.Date birth=new java.sql.Date(temp.getTime());
-                                updateSql="UPDATE user SET birthday=? WHERE username='"+this.info.getUserName()+"'";
-                                pstmt=conn.prepareStatement(updateSql);
-                                pstmt.setDate(1,birth);
-                                pstmt.executeUpdate();
-                                System.out.println("生日日期修改成功！");
-                                System.out.println("新的日期为："+birth.toString());
-                                pstmt.close();
-                                break ;
-                            case "C":
-                                System.out.print("请输入新的电话号码：");
-                                String newPhone=scanner.next();
-                                updateSql="update user SET phone=? WHERE username='"+this.info.getUserName()+"'";
-                                pstmt=conn.prepareStatement(updateSql);
-                                pstmt.setString(1,newPhone);
-                                pstmt.executeUpdate();
-                                System.out.println("电话号码修改成功！");
-                                System.out.println("新的电话号码为："+newPhone);
-                                pstmt.close();
-                                break ;
-                            case "D":
-                                break loop;
-                            default:
-                                System.out.println("请输入正确选项（A,B,C或D）");
-                        }
-                    }
+                    this.updateInfo();
                 }
                 conn.close();
                 return true;
@@ -379,6 +342,58 @@ class Log{
             pstmt.close();
             conn.close();
             return false;
+        }
+    }
+    private void updateInfo()throws Exception{
+        loop:while (true){
+            System.out.println("请选择您要进行的操作： A.修改密码  B.修改生日  C.修改电话 D.退出");
+            String choice=scanner.next();
+            String updateSql=null;
+            switch (choice){
+                case "A":
+                case "a":
+                    System.out.print("请输入新密码：");
+                    String newPassword=scanner.next();
+                    updateSql="UPDATE user SET password=? WHERE username='"+this.info.getUserName()+"'";
+                    pstmt=conn.prepareStatement(updateSql);
+                    pstmt.setString(1,newPassword);
+                    pstmt.executeUpdate();
+                    System.out.println("密码修改成功！");
+                    System.out.println("新的密码为："+newPassword);
+                    pstmt.close();
+                    break;
+                case "B":
+                case "b":
+                    System.out.print("请输入新的日期（yyyy-mm-dd）：");
+                    String newBirthday=scanner.next();
+                    java.util.Date temp=new java.text.SimpleDateFormat("yyyy-mm-dd").parse(newBirthday);
+                    java.sql.Date birth=new java.sql.Date(temp.getTime());
+                    updateSql="UPDATE user SET birthday=? WHERE username='"+this.info.getUserName()+"'";
+                    pstmt=conn.prepareStatement(updateSql);
+                    pstmt.setDate(1,birth);
+                    pstmt.executeUpdate();
+                    System.out.println("生日日期修改成功！");
+                    System.out.println("新的日期为："+birth.toString());
+                    pstmt.close();
+                    break ;
+                case "C":
+                case "c":
+                    System.out.print("请输入新的电话号码：");
+                    String newPhone=scanner.next();
+                    updateSql="update user SET phone=? WHERE username='"+this.info.getUserName()+"'";
+                    pstmt=conn.prepareStatement(updateSql);
+                    pstmt.setString(1,newPhone);
+                    pstmt.executeUpdate();
+                    System.out.println("电话号码修改成功！");
+                    System.out.println("新的电话号码为："+newPhone);
+                    pstmt.close();
+                    break ;
+                case "D":
+                case "d":
+                    break loop;
+                default:
+                    System.out.println("请输入正确选项（A,B,C或D）");
+            }
         }
     }
 }
