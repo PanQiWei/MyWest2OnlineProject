@@ -270,42 +270,14 @@ class Log{
                 pstmt.close();
                 //是管理员则进入管理员操作界面，否则进入普通用户操作界面
                 if(isAdmin==1){
-                    int resultNum=0;
                     System.out.println("欢迎回来，尊敬的管理员同志！\n 以下为所有用户信息：");
-                    pstmt=conn.prepareStatement(this.allInfoQuery);
-                    rs=pstmt.executeQuery();
+
                     //管理员界面，展示所有的用户信息，仅展示前一百条
-                    while (rs.next()){
-                        int id0=rs.getInt("id");
-                        String username0=rs.getString("username");
-                        String password0=rs.getString("password");
-                        String name0=rs.getString("name");
-                        String gender0=rs.getString("gender");
-                        java.util.Date birthday0=rs.getDate("birthday");
-                        String phone0=rs.getString("phone");
-                        int isAdmin0=rs.getInt("isadmin");
-                        System.out.print("id："+id0+"\t\t");
-                        System.out.print("账号："+username0+"\t\t");
-                        System.out.print("密码："+password0+"\t\t");
-                        System.out.print("姓名："+name0+"\t\t");
-                        System.out.print("性别："+gender0+"\t\t");
-                        System.out.print("生日："+birthday0+"\t\t");
-                        System.out.print("电话："+phone0+"\t\t");
-                        if(isAdmin0==1)
-                            System.out.println("是否是管理员：是");
-                        else
-                            System.out.println("是否是管理员：否");
-                        resultNum++;
-                        if(resultNum>100){
-                            System.out.println("只显示前100条信息！");
-                            break;
-                        }
-                    }
-                    rs.close();
-                    pstmt.close();
+                    this.showAllInfo(100);
+
                     //管理员操作，进行增、删、改三项操作
                     loop:while (true){
-                        System.out.println("请选择要进行的操作：A.添加新管理员  B.删除用户信息 C.修改管理员信息 D.退出");
+                        System.out.println("请选择要进行的操作：A.添加新管理员  B.删除用户信息 C.修改管理员信息 D.展示所有用户 信息E.退出");
                         String choice1=scanner.next();
                         switch (choice1){
                             case "A":
@@ -350,6 +322,10 @@ class Log{
                                 break ;
                             case "D":
                             case "d":
+                                this.showAllInfo(100);
+                                break ;
+                            case "E":
+                            case "e":
                                 break loop;
                             default:System.out.println("请输入正确选项（A,B,C或D）");
                         }
@@ -428,5 +404,39 @@ class Log{
                     System.out.println("请输入正确选项（A,B,C或D）");
             }
         }
+    }
+    //展示所有用户信息的方法
+    private void showAllInfo(int showNum)throws Exception{
+        pstmt=conn.prepareStatement(this.allInfoQuery);
+        rs=pstmt.executeQuery();
+        int resultNum=0;
+        while (rs.next()) {
+            int id0=rs.getInt("id");
+            String username0=rs.getString("username");
+            String password0=rs.getString("password");
+            String name0=rs.getString("name");
+            String gender0=rs.getString("gender");
+            java.util.Date birthday0=rs.getDate("birthday");
+            String phone0=rs.getString("phone");
+            int isAdmin0=rs.getInt("isadmin");
+            System.out.print("id："+id0+"\t\t");
+            System.out.print("账号："+username0+"\t\t");
+            System.out.print("密码："+password0+"\t\t");
+            System.out.print("姓名："+name0+"\t\t");
+            System.out.print("性别："+gender0+"\t\t");
+            System.out.print("生日："+birthday0+"\t\t");
+            System.out.print("电话："+phone0+"\t\t");
+            if(isAdmin0==1)
+                System.out.println("是否是管理员：是");
+            else
+                System.out.println("是否是管理员：否");
+            resultNum++;
+            if(resultNum>showNum){
+                System.out.println("只显示前"+resultNum+"条信息！");
+                break;
+            }
+        }
+        rs.close();
+        pstmt.close();
     }
 }
